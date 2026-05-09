@@ -1,34 +1,15 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import {
+  features,
+  homeFeatureAvailabilityMeta,
+  type HomeFeature,
+  type HomeFeatureAvailability,
+} from '@/config/features'
 
-const shot = (file: string) => `${import.meta.env.BASE_URL}screenshots/${file}`
-
-const features = [
-  {
-    image: shot('feature-flow.svg'),
-    imageAlt: '采购工作台：流程与协同界面示意',
-    title: '流程与协同',
-    subtitle: '围绕采购场景梳理关键步骤，减少反复沟通与遗漏，让进度一目了然。',
-  },
-  {
-    image: shot('feature-data.svg'),
-    imageAlt: '采购工作台：数据与追溯界面示意',
-    title: '数据与可追溯',
-    subtitle: '关键记录可查询、可对账，便于对内复盘与对外说明，建立使用信任。',
-  },
-  {
-    image: shot('feature-scenario.svg'),
-    imageAlt: '采购工作台：场景化配置界面示意',
-    title: '贴合实际场景',
-    subtitle: '面向真实业务痛点设计能力边界，不堆砌概念，优先解决高频问题。',
-  },
-  {
-    image: shot('feature-feedback.svg'),
-    imageAlt: '采购工作台：反馈与迭代界面示意',
-    title: '持续响应反馈',
-    subtitle: '我们相信再小的反馈也值得认真对待，并以此驱动产品迭代与体验优化。',
-  },
-]
+function getAvailability(item: HomeFeature): HomeFeatureAvailability {
+  return item.availability ?? 'stable'
+}
 </script>
 
 <template>
@@ -69,7 +50,16 @@ const features = [
             </div>
           </figure>
           <div class="feature-copy">
-            <h3 class="feature-title">{{ item.title }}</h3>
+            <div class="feature-heading">
+              <span
+                class="feature-badge"
+                :class="`feature-badge--${getAvailability(item)}`"
+                :title="homeFeatureAvailabilityMeta[getAvailability(item)].title"
+              >
+                {{ homeFeatureAvailabilityMeta[getAvailability(item)].label }}
+              </span>
+              <h3 class="feature-title">{{ item.title }}</h3>
+            </div>
             <p class="feature-subtitle">{{ item.subtitle }}</p>
           </div>
         </li>
@@ -253,8 +243,44 @@ const features = [
   text-align: center;
 }
 
+.feature-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.feature-badge {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: default;
+}
+
+.feature-badge--preview {
+  color: #e8c97a;
+  border-color: rgba(232, 201, 122, 0.45);
+  background: rgba(232, 180, 60, 0.12);
+}
+
+.feature-badge--planned {
+  color: var(--color-muted);
+  border-style: dashed;
+  border-color: rgba(138, 154, 173, 0.5);
+  background: transparent;
+}
+
 .feature-title {
-  margin: 0 0 0.85rem;
+  margin: 0;
   font-size: clamp(1.35rem, 2.8vw, 1.85rem);
   font-weight: 700;
   line-height: 1.25;
@@ -263,6 +289,7 @@ const features = [
 
 .feature-subtitle {
   margin: 0;
+  clear: both;
   font-size: clamp(1rem, 2vw, 1.125rem);
   line-height: 1.7;
   color: var(--color-muted);
