@@ -1,35 +1,45 @@
 <script setup lang="ts">
-import { downloadUrlMacos, downloadUrlWindows } from '@/config/downloadUrls'
+import {
+  downloadUrlMacos,
+  downloadUrlWindows,
+  macosDownloadSupported,
+  windowsInstallerLabel,
+} from '@/config/downloadUrls'
 
 const platforms = [
   {
-    id: 'windows',
+    id: 'windows' as const,
     name: 'Windows',
     url: downloadUrlWindows,
-    ariaLabel: '下载 Windows 版本',
+    supported: true,
+    ariaLabel: `下载 Windows 版本（${windowsInstallerLabel}）`,
+    hint: windowsInstallerLabel,
   },
   {
-    id: 'macos',
+    id: 'macos' as const,
     name: 'macOS',
     url: downloadUrlMacos,
-    ariaLabel: '下载 macOS 版本',
+    supported: macosDownloadSupported,
+    ariaLabel: 'macOS 版本暂不支持',
+    hint: '暂不支持',
   },
-] as const
+]
 </script>
 
 <template>
   <div class="page">
     <div class="inner">
       <h1 class="title">下载</h1>
-      <p class="lead">选择您的系统，点击图标开始下载。</p>
+      <p class="lead">
+        当前提供 Windows 安装包（{{ windowsInstallerLabel }}）；macOS 版本敬请期待。
+      </p>
 
       <div class="icons" role="group" aria-label="平台安装包下载">
         <a
-          v-for="p in platforms"
+          v-for="p in platforms.filter((x) => x.supported)"
           :key="p.id"
           class="icon-tile"
           :href="p.url"
-          download
           :aria-label="p.ariaLabel"
           rel="noopener noreferrer"
         >
@@ -45,8 +55,19 @@ const platforms = [
                 d="M3 3h9.5v9.5H3V3zm11.5 0H24v9.5H14.5V3zM3 14.5h9.5V24H3V14.5zm11.5 0H24V24H14.5V14.5z"
               />
             </svg>
+          </span>
+          <span class="icon-name">{{ p.name }}</span>
+          <span v-if="p.hint" class="icon-hint">{{ p.hint }}</span>
+        </a>
+
+        <div
+          v-for="p in platforms.filter((x) => !x.supported)"
+          :key="p.id"
+          class="icon-tile icon-tile--disabled"
+          :aria-label="p.ariaLabel"
+        >
+          <span class="icon-wrap" aria-hidden="true">
             <svg
-              v-else
               class="icon-svg icon-svg-apple"
               viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
@@ -58,7 +79,8 @@ const platforms = [
             </svg>
           </span>
           <span class="icon-name">{{ p.name }}</span>
-        </a>
+          <span class="icon-hint icon-hint--muted">{{ p.hint }}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -83,6 +105,7 @@ const platforms = [
 .lead {
   margin: 0 0 2.5rem;
   color: var(--color-muted);
+  line-height: 1.6;
 }
 
 .icons {
@@ -96,7 +119,7 @@ const platforms = [
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
   padding: 0;
   color: var(--color-text);
   text-decoration: none;
@@ -117,12 +140,33 @@ const platforms = [
   border-radius: 16px;
 }
 
+.icon-tile--disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.icon-tile--disabled:hover {
+  color: var(--color-text);
+}
+
+.icon-tile--disabled:hover .icon-wrap {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  transform: none;
+}
+
+.icon-tile--disabled:hover .icon-name,
+.icon-tile--disabled:hover .icon-hint {
+  color: inherit;
+}
+
 .icon-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 120px;
   height: 120px;
+  margin-bottom: 0.5rem;
   border-radius: 24px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -157,5 +201,18 @@ const platforms = [
 
 .icon-tile:hover .icon-name {
   color: var(--color-accent);
+}
+
+.icon-hint {
+  font-size: 0.85rem;
+  color: var(--color-accent);
+}
+
+.icon-hint--muted {
+  color: var(--color-muted);
+}
+
+.icon-tile--disabled .icon-hint--muted {
+  color: var(--color-muted);
 }
 </style>
