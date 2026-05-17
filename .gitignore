@@ -1,5 +1,7 @@
 node_modules
 dist
+.tools
+public/videos/demo.gif
 .DS_Store
 *.local
 .env

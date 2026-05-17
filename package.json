@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build && node scripts/copy-spa-fallback.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "convert:demo": "node scripts/convert-demo-media.mjs"
   },
   "dependencies": {
     "vue": "^3.5.13",

@@ -32,37 +32,44 @@ export interface HomeFeature {
   availability?: HomeFeatureAvailability
 }
 
-/**
- * 功能列表。`availability` 省略时等同 `stable`。
- * 下面四条暂时分别挂了三种徽章示例，便于预览样式；对外发版时请按真实情况改回。
- */
+/** 功能列表。`availability` 省略时等同 `stable`。 */
 export const features: HomeFeature[] = [
   {
+    image: shot('cljx.png'),
+    imageAlt: '采购工作台：解析策略配置界面',
+    title: '策略解析',
+    subtitle: '丰富的解析配置，一键导入各种格式的询价文件。',
+    availability: 'stable',
+  },
+  {
+    image: shot('wlzd.png'),
+    imageAlt: '采购工作台：物料字典界面',
+    title: '物料字典',
+    subtitle:
+      '使用 Markdown 格式维护物料字典，一次维护终生使用，再也不用翻阅厚厚的纸质书籍。',
+    availability: 'stable',
+  },
+  {
+    image: shot('sjccwz.png'),
+    imageAlt: '采购工作台：数据存储位置设置',
+    title: '数据存储位置维护',
+    subtitle: '自定义工作路径，避免 C 盘空间大量占用。',
+    availability: 'stable',
+  },
+  {
+    image: shot('gy.png'),
+    imageAlt: '采购工作台：关于页面',
+    title: '关于工作台',
+    subtitle:
+      '通过关于页面的信息与我们取得联系，不论是新增功能还是 Bug 报告，我们都将第一时间给你回复。',
+    availability: 'stable',
+  },
+  {
     image: shot('feature-flow.svg'),
-    imageAlt: '采购工作台：流程与协同界面示意',
-    title: '流程与协同',
-    subtitle: '围绕采购场景梳理关键步骤，减少反复沟通与遗漏，让进度一目了然。',
-    availability: 'stable',
-  },
-  {
-    image: shot('feature-data.svg'),
-    imageAlt: '采购工作台：数据与追溯界面示意',
-    title: '数据与可追溯',
-    subtitle: '关键记录可查询、可对账，便于对内复盘与对外说明，建立使用信任。',
-    availability: 'preview',
-  },
-  {
-    image: shot('feature-scenario.svg'),
-    imageAlt: '采购工作台：场景化配置界面示意',
-    title: '贴合实际场景',
-    subtitle: '面向真实业务痛点设计能力边界，不堆砌概念，优先解决高频问题。',
+    imageAlt: '采购工作台：机器人自动询价（规划中）',
+    title: '机器人自动询价',
+    subtitle:
+      '在多平台自动采集报价、辅助比价，减少重复手工操作；该能力已纳入规划，正在加急开发中。',
     availability: 'planned',
-  },
-  {
-    image: shot('feature-feedback.svg'),
-    imageAlt: '采购工作台：反馈与迭代界面示意',
-    title: '持续响应反馈',
-    subtitle: '我们相信再小的反馈也值得认真对待，并以此驱动产品迭代与体验优化。',
-    availability: 'stable',
   },
 ]

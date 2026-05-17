@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   features,
@@ -6,10 +7,47 @@ import {
   type HomeFeature,
   type HomeFeatureAvailability,
 } from '@/config/features'
+import {
+  getWorkflowDemoVideoUrl,
+  getWorkflowDemoWebmUrl,
+  isWorkflowDemoGif,
+  workflowSteps,
+} from '@/config/workflowDemo'
 
 function getAvailability(item: HomeFeature): HomeFeatureAvailability {
   return item.availability ?? 'stable'
 }
+
+/** 进入视口后再挂接演示媒体，避免首屏拉取大文件 */
+const workflowRoot = ref<HTMLElement | null>(null)
+const demoVideoSrc = ref<string | null>(null)
+let workflowObserver: IntersectionObserver | null = null
+
+onMounted(() => {
+  const el = workflowRoot.value
+  if (!el || typeof IntersectionObserver === 'undefined') {
+    demoVideoSrc.value = getWorkflowDemoVideoUrl()
+    return
+  }
+  workflowObserver = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue
+        demoVideoSrc.value = getWorkflowDemoVideoUrl()
+        workflowObserver?.disconnect()
+        workflowObserver = null
+        break
+      }
+    },
+    { root: null, rootMargin: '280px 0px', threshold: 0.01 },
+  )
+  workflowObserver.observe(el)
+})
+
+onBeforeUnmount(() => {
+  workflowObserver?.disconnect()
+  workflowObserver = null
+})
 </script>
 
 <template>
@@ -26,11 +64,64 @@ function getAvailability(item: HomeFeature): HomeFeatureAvailability {
       </div>
     </section>
 
+    <section
+      id="workflow"
+      ref="workflowRoot"
+      class="workflow"
+      aria-labelledby="workflow-title"
+    >
+      <header class="workflow-head">
+        <h2 id="workflow-title" class="section-title">全新的采购工作流程</h2>
+        <p class="section-lead">
+          下面按时间顺序概括典型路径。
+        </p>
+      </header>
+
+      <ol class="workflow-steps">
+        <li v-for="(step, i) in workflowSteps" :key="i" class="workflow-step">
+          <span class="workflow-step-index" aria-hidden="true">{{ i + 1 }}</span>
+          <div class="workflow-step-body">
+            <h3 class="workflow-step-title">{{ step.title }}</h3>
+            <p class="workflow-step-summary">{{ step.summary }}</p>
+          </div>
+        </li>
+      </ol>
+
+      <div class="workflow-video-wrap">
+        <div class="shot-frame workflow-video-frame">
+          <template v-if="demoVideoSrc">
+            <img
+              v-if="isWorkflowDemoGif()"
+              class="workflow-video"
+              :src="demoVideoSrc"
+              alt="采购工作台一日流程演示"
+              loading="lazy"
+              decoding="async"
+            />
+            <video
+              v-else
+              class="workflow-video"
+              controls
+              playsinline
+              preload="none"
+            >
+              <source :src="getWorkflowDemoWebmUrl()" type="video/webm" />
+              <source :src="demoVideoSrc" type="video/mp4" />
+              您的浏览器不支持内嵌视频播放。
+            </video>
+          </template>
+          <div v-else class="workflow-video-placeholder" role="status">
+            <span class="workflow-video-placeholder-text">演示视频将在您浏览到此处时开始加载</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section id="features" class="features">
       <header class="features-head">
         <h2 class="section-title">功能与产品</h2>
         <p class="section-lead">
-          每项能力均配有界面示意（可替换为真实产品截图）；说明为能力方向，具体以实际发版为准。
+          每项能力均配有产品界面截图；具体行为与细节以实际发版为准。
         </p>
       </header>
 
@@ -163,6 +254,102 @@ function getAvailability(item: HomeFeature): HomeFeatureAvailability {
 .btn-lg {
   padding: 0.75rem 1.5rem;
   align-self: center;
+}
+
+.workflow {
+  padding: 3.5rem 0 4.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.workflow-head {
+  max-width: 720px;
+  margin: 0 auto 2.75rem;
+  padding: 0 1.5rem;
+  text-align: center;
+}
+
+.workflow-steps {
+  list-style: none;
+  margin: 0 auto 2.75rem;
+  padding: 0 1.25rem;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.workflow-step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem 1.1rem;
+  align-items: start;
+}
+
+.workflow-step-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0a1624;
+  background: var(--color-accent);
+  line-height: 1;
+}
+
+.workflow-step-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.workflow-step-summary {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: var(--color-muted);
+}
+
+.workflow-video-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+.workflow-video-frame {
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0b1016;
+}
+
+.workflow-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.workflow-video-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.5rem;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.workflow-video-placeholder-text {
+  font-size: 0.95rem;
+  color: var(--color-muted);
+  max-width: 26rem;
+  line-height: 1.55;
 }
 
 .features {
